@@ -1,4 +1,4 @@
-build-rootfs: busybox $(rootfs_target)
+build-rootfs: busybox hello $(rootfs_target)
 
 busybox:
 	$(shell mkdir -p ${target_out_busybox})
@@ -10,6 +10,11 @@ busybox:
 		ARCH=arm CROSS_COMPILE=$(CROSS_COMPILE) \
 		CFLAGS=$(ROOTFS_CFLAGS) SKIP_STRIP=y \
 		CONFIG_PREFIX=$(target_out_romfs) install
+
+hello: programs/hello.c
+	arm-uclinuxeabi-gcc -march=armv7-m -mthumb \
+		-Wl,-elf2flt=-s -Wl,-elf2flt=16384 \
+		-static -Os -o ${target_out_romfs}/bin/hello $<
 
 $(rootfs_target): $(rootfs_dir) $(target_out_busybox)/.config
 	cp -af $(rootfs_dir)/* $(target_out_romfs)
